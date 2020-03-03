@@ -1,5 +1,5 @@
 # probability of event
-hindcastSSO <- function(t0, t1, dw, dp, indvar0){
+hindcastSSO <- function(t0, t1, dw, dp, indvar0, modprm){
   
   ##
   # sanity checks
@@ -18,25 +18,26 @@ hindcastSSO <- function(t0, t1, dw, dp, indvar0){
   indvar <- indvar0
   indvar[, 1] <- indvar[, 1] + dp
   indvar[, 3] <- indvar[, 3] + dw
-  # ok = find(stime0>=t0 & stime0<t1);
-  # indvar = indvar(ok,:);
-  # time = stime0(ok);
-  # 
-  # %----------------------------------------------
-  #   % adjust p(wl<mn(wl))=0
-  # %----------------------------------------------
-  #   w2 = indvar(:,3);
-  # low = find(w2<mnw);
-  # 
-  # %------------------------------------------------
-  #   % execute regression to calculate p
-  # % probability of non-event =(1-p)
-  # %------------------------------------------------
-  #   [pihat,dlow,dhi] = mnrval(coeff,indvar,stats); 
-  # p = pihat(:,2);  % probability of event
-  # p(low) = 0;
-  # 
-  # 
-  # 
+
+  # subset indvar by input date range
+  ok <- with(indvar, stime0 >= t0 & stime0 < t1)
+  indvar <- indvar[ok, ]
+  time <- indvar$stime0[ok]
+
+  # find which water levels are below the mean
+  w2 <- indvar[, 3]
+  low <- w2 < mnw
+
+  #------------------------------------------------
+  # execute regression to calculate p
+  # probability of non-event =(1-p)
+  #------------------------------------------------
+
+  coeff <- modprm$coeff
+  stats <- modprm$stats
   
+  # [pihat,dlow,dhi] = mnrval(coeff,indvar,stats);
+  # p = pihat(:,2);  #probability of event
+  # p(low) = 0;
+
 }
