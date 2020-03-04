@@ -404,6 +404,34 @@ dat &lt;- dat %&gt;%
 </div>
 <div id="assess-results" class="section level2">
 <h2>Assess results</h2>
+<pre class="r"><code># model coefficents
+summary(mod)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = overflow ~ precp + water + var2 + var4, family = binomial(link = &quot;logit&quot;), 
+##     data = dat)
+## 
+## Deviance Residuals: 
+##      Min        1Q    Median        3Q       Max  
+## -1.19457  -0.00731  -0.00273  -0.00116   2.69242  
+## 
+## Coefficients:
+##              Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept) -22.64012    6.01264  -3.765 0.000166 ***
+## precp         3.14195    1.13930   2.758 0.005819 ** 
+## water        10.25472    5.15412   1.990 0.046633 *  
+## var2          0.14919    0.06919   2.156 0.031061 *  
+## var4         -1.65919    0.93858  -1.768 0.077099 .  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 95.913  on 6534  degrees of freedom
+## Residual deviance: 29.105  on 6530  degrees of freedom
+## AIC: 39.105
+## 
+## Number of Fisher Scoring iterations: 13</code></pre>
 <pre class="r"><code># contingency table of results
 table(dat[, c(&#39;overflow&#39;, &#39;prdbin&#39;)])</code></pre>
 <pre><code>##         prdbin

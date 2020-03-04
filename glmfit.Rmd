@@ -52,6 +52,9 @@ dat <- dat %>%
 ## Assess results
 
 ```{r}
+# model coefficents
+summary(mod)
+
 # contingency table of results
 table(dat[, c('overflow', 'prdbin')])
 ```
