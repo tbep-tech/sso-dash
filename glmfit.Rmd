@@ -1,0 +1,66 @@
+---
+output: 
+  html_document
+self_contained: yes
+---
+
+```{r setup, message = F, warning = F, results = 'hide', echo = F}
+knitr::opts_chunk$set(echo = T, warning = F, message = F, fig.path = 'figs/', dev.args = list(family = 'serif'))
+```
+
+# GLM for probability of SSO event
+
+## Import and format data
+
+```{r}
+library(tidyverse)
+library(here)
+library(lubridate)
+
+# import data
+indvar0 <- read.csv(here::here('data/data-raw/LR_final_indvar0.csv'), stringsAsFactors = F)
+depvar0 <- read.csv(here::here('data/data-raw/LR_final_depvar0.csv'), stringsAsFactors = F)
+
+# combine independent, dependent, rename some things
+dat <- bind_cols(depvar0, indvar0) %>% 
+  select(
+    overflow = DepVar, 
+    precp = `indvar0...1.`,
+    var2 = `indvar0...2.`,
+    water = `indvar0...3.`, 
+    var4 = `indvar0...4.`, 
+    date = stime0
+  ) %>% 
+  mutate(date = dmy(date))
+```
+
+## Create GLM
+
+```{r}
+# model
+mod <- glm(overflow ~ precp + water + var2 + var4, family =binomial(link = "logit"), data = dat)
+
+# add predictions to input dataset
+# predictions with pr > 0.4 indicate overflow
+dat <- dat %>% 
+  mutate(
+    prd = predict(mod, type = 'resp'), 
+    prdbin = ifelse(prd > 0.4, 1, 0)
+  )
+```
+
+## Assess results
+
+```{r}
+# contingency table of results
+table(dat[, c('overflow', 'prdbin')])
+```
+
+```{r, fig.height = 3, fig.width = 8}
+ggplot(dat, aes(x = date, y = prd)) + 
+  geom_line(size = 1) + 
+  geom_vline(data = dat[dat$overflow == 1, ], aes(xintercept = date), linetype = 'dashed', color = 'red', size = 1) + 
+  geom_hline(yintercept = 0.4, color = 'lightblue', size = 1) + 
+  theme_bw() + 
+  labs(x = NULL, y = 'Predicted probability', subtitle = "Dotted red lines indicate actual overflow event")
+```
