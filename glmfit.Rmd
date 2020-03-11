@@ -32,6 +32,10 @@ dat <- bind_cols(depvar0, indvar0) %>%
     date = stime0
   ) %>% 
   mutate(date = dmy(date))
+
+# remove all records where water < mean water level
+dat <- dat %>% 
+  filter(water >= mean(water))
 ```
 
 ## Create GLM
