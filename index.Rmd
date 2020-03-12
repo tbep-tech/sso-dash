@@ -2,7 +2,7 @@
 title: "<h2>SSO risk probabilities</h2>"
 output: 
   html_document:
-  css: styles.css
+    css: styles.css
 runtime: shiny
 ---
   
