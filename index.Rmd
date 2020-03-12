@@ -1,0 +1,80 @@
+---
+title: "<h2>SSO risk probabilities</h2>"
+output: 
+  html_document:
+  css: styles.css
+runtime: shiny
+---
+  
+```{r, warning = F, message = F, echo = F}
+knitr::opts_chunk$set(echo = TRUE, warning = F, message = F, echo = F)
+
+library(shiny)
+library(ggplot2)
+# library(plotly)
+
+data(indvar0)
+data(rskmod)
+
+source('R/funcs.R')
+
+dts <- range(indvar0$date)
+```
+
+```{r reactives}
+# predictions
+prds <- reactive({
+  
+  # inputs
+  dtssel <- input$dtssel
+  wtrsel <- input$wtrsel
+  prpsel <- input$prpsel
+  
+  out <- hindcastSSO(dtssel[1], dtssel[2], wtrsel, prpsel, indvar0, rskmod)
+  
+  return(out)
+  
+})
+
+# plot
+plos <- reactive({
+  
+  # input
+  prds <- prds()
+  
+  p <- ggplot(prds, aes(x = date, y = risk)) + 
+    geom_line() + 
+    theme_bw(base_size = 18) + 
+    scale_y_continuous(limits = c(0, 1)) + 
+    geom_hline(yintercept = 0.4, linetype = 'dashed', size = 1) + 
+    labs(
+      x = NULL, 
+      y = 'Probability of overflow'
+    )
+  
+  return(p)
+  
+})
+```
+
+```{r ui}
+column(12, 
+       column(4, 
+              sliderInput('dtssel', 'Select date range:', min = dts[1], max = dts[2], value = dts, timeFormat="%Y-%m", width = '600px')
+
+       ),
+       column(4, 
+              sliderInput('wtrsel', 'Select water level (m):', min = 0, max = 0.5, value = 0.3, width = '600px', animate = T)
+              
+              ),
+       column(4, 
+              sliderInput('prpsel', 'Select 2d-precipitation level (cm):', min = 0, max = 1.8, value = 0.2, width = '600px', animate = T)
+              )
+)
+```
+
+```{r}
+output$plos <- renderPlot(plos(), height = 500, width = 900)
+plotOutput('plos')
+```
+

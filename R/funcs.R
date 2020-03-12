@@ -1,6 +1,6 @@
 # probability of event
 hindcastSSO <- function(t0, t1, dw, dp, indvar0, modin){
-
+  
   ##
   # sanity checks
   if(dw > 0.5)
