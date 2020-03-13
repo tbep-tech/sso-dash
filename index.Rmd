@@ -19,7 +19,7 @@ library(patchwork)
 data(indvar0)
 data(rskmod)
 
-source('R/funcs.R')
+source("R/funcs.R")
 
 alph <- 0.8
 dts <- range(indvar0$date)
@@ -75,7 +75,7 @@ plos <- reactive({
     scale_x_date(expand = c(0, 0)) +
     labs(
       x = NULL, 
-      y = 'Water level (m)'
+      y = '2-day max water level (m)'
     )
   
   p3 <- ggplot(toplo, aes(x = date, ymax = precp)) + 
@@ -86,7 +86,7 @@ plos <- reactive({
     scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0)) + 
     labs(
       x = NULL, 
-      y = '2d precipitation (cm)'
+      y = '2-day precipitation (cm)'
     )
 
   out <- p1 + p2 + p3 + plot_layout(ncol = 1)
@@ -114,7 +114,7 @@ column(12,
 
        ),
        column(4, 
-              sliderInput('wtrsel', 'Select water level increase (m):', min = 0, max = 0.5, value = 0.3, width = '600px', animate = T)
+              sliderInput('wtrsel', 'Select 2-day max water increase (m):', min = 0, max = 0.5, value = 0.3, width = '600px', animate = T)
               
               ),
        column(4, 

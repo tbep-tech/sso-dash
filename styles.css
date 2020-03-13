@@ -102,25 +102,6 @@ h5 {
   color: #958984;
 }
 
-
-/* shiny slider stuff */
-
-.irs-bar {
-  background: #00806E
-}
-.irs-bar {
-  border-top: 1px #00806E
-}
-.irs-bar-edge {
-  background: #00806E
-}
-.irs-bar-edge {
-  border: 1px #00806E
-}
-.irs-single {
-  background: #00806E;
-}
-
 /* tabset top border */
 
 .nav-tabs-custom > .nav-tabs > li.active {
