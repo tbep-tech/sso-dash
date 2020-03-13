@@ -11,6 +11,9 @@ knitr::opts_chunk$set(echo = TRUE, warning = F, message = F, echo = F)
 
 library(shiny)
 library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(patchwork)
 # library(plotly)
 
 data(indvar0)
@@ -18,7 +21,15 @@ data(rskmod)
 
 source('R/funcs.R')
 
+alph <- 0.8
 dts <- range(indvar0$date)
+
+
+downloadButtonRmd <- function (outputId, label = "Download", class = NULL, ...)  {
+  tags$a(id = outputId, class = paste("btn btn-default shiny-download-link", 
+                                      class), href = "", target = "_blank", download = NA, 
+         icon("download"), label, ...)
+}
 ```
 
 ```{r reactives}
@@ -42,19 +53,58 @@ plos <- reactive({
   # input
   prds <- prds()
   
-  p <- ggplot(prds, aes(x = date, y = risk)) + 
-    geom_line() + 
+  toplo <- prds
+  
+  p1 <- ggplot(toplo, aes(x = date, ymax = risk)) + 
+    geom_ribbon(aes(ymin = 0), fill = 'tomato1', alpha = alph) + 
+    # geom_line(aes(y = risk), color = 'tomato1') +
     theme_bw(base_size = 18) + 
-    scale_y_continuous(limits = c(0, 1)) + 
+    scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) + 
+    scale_x_date(expand = c(0, 0)) +
     geom_hline(yintercept = 0.4, linetype = 'dashed', size = 1) + 
     labs(
       x = NULL, 
       y = 'Probability of overflow'
     )
   
-  return(p)
+  p2 <- ggplot(toplo, aes(x = date, ymax = water)) + 
+    geom_ribbon(aes(ymin = 0), alpha = alph, fill = 'lightblue') +
+    # geom_line(aes(y = water), color = 'lightblue') +
+    theme_bw(base_size = 18) + 
+    scale_y_continuous(limits = c(0, 2.02), expand = c(0, 0)) + 
+    scale_x_date(expand = c(0, 0)) +
+    labs(
+      x = NULL, 
+      y = 'Water level (m)'
+    )
+  
+  p3 <- ggplot(toplo, aes(x = date, ymax = precp)) + 
+    geom_ribbon(aes(ymin = 0), alpha = alph, fill = 'grey') + 
+    # geom_line(aes(y = precp), color = 'grey') +
+    theme_bw(base_size = 18) + 
+    scale_x_date(expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0)) + 
+    labs(
+      x = NULL, 
+      y = '2d precipitation (cm)'
+    )
+
+  out <- p1 + p2 + p3 + plot_layout(ncol = 1)
+  
+  return(out)
   
 })
+```
+
+```{r downloadhandlers}
+# risk predictions
+output$rskdwntab <- downloadHandler(
+  filename = function(){'riskdat.csv'},
+  content = function(file){
+    todl <- prds()
+    write.csv(todl, file, quote = T, row.names = F)
+  }
+)
 ```
 
 ```{r ui}
@@ -64,17 +114,22 @@ column(12,
 
        ),
        column(4, 
-              sliderInput('wtrsel', 'Select water level (m):', min = 0, max = 0.5, value = 0.3, width = '600px', animate = T)
+              sliderInput('wtrsel', 'Select water level increase (m):', min = 0, max = 0.5, value = 0.3, width = '600px', animate = T)
               
               ),
        column(4, 
-              sliderInput('prpsel', 'Select 2d-precipitation level (cm):', min = 0, max = 1.8, value = 0.2, width = '600px', animate = T)
+              sliderInput('prpsel', 'Select 2d-precipitation increase (cm):', min = 0, max = 1.8, value = 0.2, width = '600px', animate = T)
+              )
+)
+column(12, 
+       column(4, 
+              downloadButtonRmd('rskdwntab', 'Download data')
               )
 )
 ```
 
 ```{r}
-output$plos <- renderPlot(plos(), height = 500, width = 900)
+output$plos <- renderPlot(plos(), height = 700, width = 900)
 plotOutput('plos')
 ```
 
