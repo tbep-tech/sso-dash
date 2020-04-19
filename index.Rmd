@@ -1,8 +1,8 @@
 ---
-title: "<h2>SSO risk probabilities</h2>"
+title: "SSO risk probabilities"
 output: 
-  html_document:
-    css: styles.css
+  flexdashboard::flex_dashboard:
+    orientation: rows
 runtime: shiny
 ---
   
@@ -14,6 +14,9 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(patchwork)
+library(ShinyDash)
+library(shinydashboard)
+library(flexdashboard)
 # library(plotly)
 
 data(indvar0)
@@ -23,7 +26,6 @@ source("R/funcs.R")
 
 alph <- 0.8
 dts <- range(indvar0$date)
-
 
 downloadButtonRmd <- function (outputId, label = "Download", class = NULL, ...)  {
   tags$a(id = outputId, class = paste("btn btn-default shiny-download-link", 
@@ -40,11 +42,40 @@ prds <- reactive({
   dtssel <- input$dtssel
   wtrsel <- input$wtrsel
   prpsel <- input$prpsel
+  prbsel <- input$prbsel
   
-  out <- hindcastSSO(dtssel[1], dtssel[2], wtrsel, prpsel, indvar0, rskmod)
+  out <- hindcastSSO(dtssel[1], dtssel[2], wtrsel, prpsel, indvar0, rskmod, prbsel)
   
   return(out)
   
+})
+
+# estimate number of events
+evnts <- reactive({
+  
+  # inputs
+  prds <- prds()
+  
+  out <- rle(prds$evnt)
+  out <- out$lengths[out$value]
+  out <- length(out)
+  
+  return(out)
+
+})
+
+# estimate total length of events
+lens <- reactive({
+  
+  # inputs
+  prds <- prds()
+  
+  out <- rle(prds$evnt)
+  out <- out$lengths[out$value]
+  out <- sum(out)
+  
+  return(out)
+
 })
 
 # plot
@@ -52,6 +83,7 @@ plos <- reactive({
   
   # input
   prds <- prds()
+  prbsel <- input$prbsel
   
   toplo <- prds
   
@@ -61,10 +93,10 @@ plos <- reactive({
     theme_bw(base_size = 18) + 
     scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) + 
     scale_x_date(expand = c(0, 0)) +
-    geom_hline(yintercept = 0.4, linetype = 'dashed', size = 1) + 
+    geom_hline(yintercept = prbsel, linetype = 'dashed', size = 1) + 
     labs(
       x = NULL, 
-      y = 'Probability of overflow'
+      y = 'Pr. overflow'
     )
   
   p2 <- ggplot(toplo, aes(x = date, ymax = water)) + 
@@ -75,7 +107,7 @@ plos <- reactive({
     scale_x_date(expand = c(0, 0)) +
     labs(
       x = NULL, 
-      y = '2-day max water level (m)'
+      y = '2-day max water (m)'
     )
   
   p3 <- ggplot(toplo, aes(x = date, ymax = precp)) + 
@@ -86,7 +118,7 @@ plos <- reactive({
     scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0)) + 
     labs(
       x = NULL, 
-      y = '2-day precipitation (cm)'
+      y = '2-day precip (cm)'
     )
 
   out <- p1 + p2 + p3 + plot_layout(ncol = 1)
@@ -109,17 +141,18 @@ output$rskdwntab <- downloadHandler(
 
 ```{r ui}
 column(12, 
-       column(4, 
-              sliderInput('dtssel', 'Select date range:', min = dts[1], max = dts[2], value = dts, timeFormat="%Y-%m", width = '600px')
-
-       ),
-       column(4, 
-              sliderInput('wtrsel', 'Select 2-day max water increase (m):', min = 0, max = 0.5, value = 0.3, width = '600px', animate = T)
-              
-              ),
-       column(4, 
-              sliderInput('prpsel', 'Select 2d-precipitation increase (cm):', min = 0, max = 1.8, value = 0.2, width = '600px', animate = T)
-              )
+  column(3, 
+    sliderInput('dtssel', 'Select date range:', min = dts[1], max = dts[2], value = dts, timeFormat="%Y-%m", width = '600px')
+  ),       
+  column(3, 
+    sliderInput('prbsel', 'Select probability defining SSO:', min = 0, max = 1, value = 0.4, width = '600px', animate = T)
+  ),
+  column(3, 
+    sliderInput('wtrsel', 'Select 2-day max water increase (m):', min = 0, max = 0.5, value = 0.3, width = '600px', animate = T)
+  ),
+  column(3, 
+    sliderInput('prpsel', 'Select 2d-precipitation increase (cm):', min = 0, max = 1.8, value = 0.2, width = '600px', animate = T)
+  )
 )
 column(12, 
        column(4, 
@@ -128,8 +161,69 @@ column(12,
 )
 ```
 
+Row {data-height=100}
+-------------------------------------
+
+###   
+   
 ```{r}
-output$plos <- renderPlot(plos(), height = 700, width = 900)
+output$evntsbox <- renderValueBox({
+  
+  # input
+  evnts <- evnts()
+  
+  flexdashboard::valueBox(
+    evnts, "Overflow events", color = "lightblue"
+  )
+
+})
+valueBoxOutput('evntsbox')
+```
+
+###
+
+```{r}
+output$lensbox <- renderValueBox({
+  
+  # input
+  lens <- lens()
+  
+  valueBox(
+    lens, "Overflow total duration in days", color = "lightblue"
+  )
+
+})
+valueBoxOutput('lensbox')
+```
+
+###
+
+```{r}
+output$percbox <- renderValueBox({
+  
+  # input
+  lens <- lens()
+  dtssel <- input$dtssel
+  
+  tots <- diff(dtssel, units = 'days')
+  tots <- as.numeric(tots)
+  perc <- paste(round(100 * lens / tots, 1), '%')
+
+  valueBox(
+    perc, "Overflow total duration in percent", color = "lightblue"
+  )
+
+})
+valueBoxOutput('percbox')
+```
+
+Row {data-height=650}
+-------------------------------------
+
+### 
+
+```{r}
+output$plos <- renderPlot(plos())
 plotOutput('plos')
 ```
 

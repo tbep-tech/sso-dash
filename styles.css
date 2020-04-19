@@ -65,11 +65,11 @@ h5 {
 .sidebar {
   font-family: 'Lato';
   font-weight: 300;
-  color: #958984;
+  color: #FFFFFF;
 }
 
 .section.sidebar {
-  background-color: #95898430; /* gray with alpha */
+  background-color: #FFFFFF; /* gray with alpha */
 }
 
 #editor-map { /* this sets map editor height dynamically if in sidebar */

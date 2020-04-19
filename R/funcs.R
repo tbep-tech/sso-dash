@@ -1,5 +1,5 @@
 # probability of event
-hindcastSSO <- function(t0, t1, dw, dp, indvar0, modin){
+hindcastSSO <- function(t0, t1, dw, dp, indvar0, modin, prb){
   
   ##
   # sanity checks
@@ -34,6 +34,7 @@ hindcastSSO <- function(t0, t1, dw, dp, indvar0, modin){
   
   # output
   indvar$risk <- prds
+  indvar$evnt <- prds >= prb
   
   return(indvar)
 
