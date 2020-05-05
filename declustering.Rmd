@@ -1,6 +1,7 @@
 ---
 output: 
-  html_document
+  html_document:
+    code_folding: hide
 self_contained: yes
 ---
   
@@ -10,13 +11,12 @@ knitr::opts_chunk$set(echo = T, warning = F, message = F, fig.path = 'figs/', de
 
 # Declustering
 
-## Import and format data
-
 ```{r, message = F, warning = F}
 library(tidyverse)
 library(here)
 library(lubridate)
 library(ggExtra)
+library(gridExtra)
 library(extRemes)
 
 # import data
@@ -32,49 +32,20 @@ dat <- indvar0 %>%
   mutate(date = dmy(date))
 ```
 
-## Subset by values > 5  sd for precipitation
-
-```{r}
-sdup <- 5
-subdat <- dat %>% 
-  mutate(
-    fltval = mean(precp, na.rm = T) + sdup * sd(precp, na.rm = T)
-  ) %>%
-  filter(precp > fltval) 
-```
-
-## Create marginal plots of water and precip
-
-```{r, fig.height = 5, fig.width = 5}
-p <- ggplot(subdat, aes(x = water, y = precp)) +
-  geom_path(color = 'grey') + 
-  geom_point(size = 2) + 
-  theme_bw() + 
-  theme(
-    panel.grid = element_blank()
-  ) +
-  labs(
-    x = expression(paste(W[2], ' (m, MLLW)')), 
-    y = expression(paste(P[2], ' (cm)')), 
-    title = expression(paste(P[2] > 5, sigma))
-  )
-
-ggMarginal(p, type = 'histogram', size = 2)
-```
-
 ## Declustering precip only {.tabset}
 
 ### > 3 sd
 
-```{r, fig.height = 5, fig.width = 5}
+```{r, fig.height = 5, fig.width = 10}
 sdup <- 3
 dcldat <- dat %>% 
   mutate(
     fltval = mean(precp, na.rm = T) + sdup * sd(precp, na.rm = T),
     dclprecp = decluster(precp, unique(fltval))
-  )
+  ) %>% 
+  filter(precp > fltval)
 
-p <- ggplot(dcldat, aes(x = water, y = dclprecp)) +
+p1 <- ggplot(dcldat, aes(x = water, y = dclprecp)) +
   geom_path(color = 'grey') + 
   geom_point(size = 2) + 
   theme_bw() + 
@@ -87,20 +58,36 @@ p <- ggplot(dcldat, aes(x = water, y = dclprecp)) +
     title = bquote('Values >'~.(sdup)*sigma~'declustered')
   )
 
-ggMarginal(p, type = 'histogram', size = 2)
+p2 <-  ggplot(dcldat, aes(x = water, y = precp)) +
+  geom_path(color = 'grey') + 
+  geom_point(size = 2) + 
+  theme_bw() + 
+  theme(
+    panel.grid = element_blank()
+  ) +
+  labs(
+    x = expression(paste(W[2], ' (m, MLLW)')), 
+    y = expression(paste(P[2], ' (cm)')), 
+    title = bquote('Values >'~.(sdup)*sigma)
+  )
+
+p1 <- ggMarginal(p1, type = 'histogram', size = 2)
+p2 <- ggMarginal(p2, type = 'histogram', size = 2)
+grid.arrange(p1, p2, ncol = 2)
 ```
 
 ### > 4 sd
 
-```{r, fig.height = 5, fig.width = 5}
+```{r, fig.height = 5, fig.width = 10}
 sdup <- 4
 dcldat <- dat %>% 
   mutate(
     fltval = mean(precp, na.rm = T) + sdup * sd(precp, na.rm = T),
     dclprecp = decluster(precp, unique(fltval))
-  )
+  ) %>% 
+  filter(precp > fltval)
 
-p <- ggplot(dcldat, aes(x = water, y = dclprecp)) +
+p1 <- ggplot(dcldat, aes(x = water, y = dclprecp)) +
   geom_path(color = 'grey') + 
   geom_point(size = 2) + 
   theme_bw() + 
@@ -113,20 +100,36 @@ p <- ggplot(dcldat, aes(x = water, y = dclprecp)) +
     title = bquote('Values >'~.(sdup)*sigma~'declustered')
   )
 
-ggMarginal(p, type = 'histogram', size = 2)
+p2 <-  ggplot(dcldat, aes(x = water, y = precp)) +
+  geom_path(color = 'grey') + 
+  geom_point(size = 2) + 
+  theme_bw() + 
+  theme(
+    panel.grid = element_blank()
+  ) +
+  labs(
+    x = expression(paste(W[2], ' (m, MLLW)')), 
+    y = expression(paste(P[2], ' (cm)')), 
+    title = bquote('Values >'~.(sdup)*sigma)
+  )
+
+p1 <- ggMarginal(p1, type = 'histogram', size = 2)
+p2 <- ggMarginal(p2, type = 'histogram', size = 2)
+grid.arrange(p1, p2, ncol = 2)
 ```
 
 ### > 5 sd
 
-```{r, fig.height = 5, fig.width = 5}
+```{r, fig.height = 5, fig.width = 10}
 sdup <- 5
 dcldat <- dat %>% 
   mutate(
     fltval = mean(precp, na.rm = T) + sdup * sd(precp, na.rm = T),
     dclprecp = decluster(precp, unique(fltval))
-  )
+  ) %>% 
+  filter(precp > fltval)
 
-p <- ggplot(dcldat, aes(x = water, y = dclprecp)) +
+p1 <- ggplot(dcldat, aes(x = water, y = dclprecp)) +
   geom_path(color = 'grey') + 
   geom_point(size = 2) + 
   theme_bw() + 
@@ -139,13 +142,7 @@ p <- ggplot(dcldat, aes(x = water, y = dclprecp)) +
     title = bquote('Values >'~.(sdup)*sigma~'declustered')
   )
 
-ggMarginal(p, type = 'histogram', size = 2)
-```
-
-### None
-
-```{r, fig.height = 5, fig.width = 5}
-p <- ggplot(dat, aes(x = water, y = precp)) +
+p2 <-  ggplot(dcldat, aes(x = water, y = precp)) +
   geom_path(color = 'grey') + 
   geom_point(size = 2) + 
   theme_bw() + 
@@ -155,17 +152,19 @@ p <- ggplot(dat, aes(x = water, y = precp)) +
   labs(
     x = expression(paste(W[2], ' (m, MLLW)')), 
     y = expression(paste(P[2], ' (cm)')), 
-    title = 'No declustering'
+    title = bquote('Values >'~.(sdup)*sigma)
   )
 
-ggMarginal(p, type = 'histogram', size = 2)
+p1 <- ggMarginal(p1, type = 'histogram', size = 2)
+p2 <- ggMarginal(p2, type = 'histogram', size = 2)
+grid.arrange(p1, p2, ncol = 2)
 ```
 
 ## Declustering precip and water {.tabset}
 
 ### > 3 sd
 
-```{r, fig.height = 5, fig.width = 5}
+```{r, fig.height = 5, fig.width = 10}
 sdup <- 3
 dcldat <- dat %>% 
   mutate(
@@ -173,9 +172,10 @@ dcldat <- dat %>%
     dclprecp = decluster(precp, unique(prcval)),    
     wtrval = mean(water, na.rm = T) + sdup * sd(water, na.rm = T),
     dclwater = decluster(water, unique(wtrval))
-  )
+  ) %>% 
+  filter(precp > prcval)
 
-p <- ggplot(dcldat, aes(x = dclwater, y = dclprecp)) +
+p1 <- ggplot(dcldat, aes(x = dclwater, y = dclprecp)) +
   geom_path(color = 'grey') + 
   geom_point(size = 2) + 
   theme_bw() + 
@@ -188,12 +188,27 @@ p <- ggplot(dcldat, aes(x = dclwater, y = dclprecp)) +
     title = bquote('Values >'~.(sdup)*sigma~'declustered')
   )
 
-ggMarginal(p, type = 'histogram', size = 2)
+p2 <-  ggplot(dcldat, aes(x = water, y = precp)) +
+  geom_path(color = 'grey') + 
+  geom_point(size = 2) + 
+  theme_bw() + 
+  theme(
+    panel.grid = element_blank()
+  ) +
+  labs(
+    x = expression(paste(W[2], ' (m, MLLW)')), 
+    y = expression(paste(P[2], ' (cm)')), 
+    title = bquote('Values >'~.(sdup)*sigma)
+  )
+
+p1 <- ggMarginal(p1, type = 'histogram', size = 2)
+p2 <- ggMarginal(p2, type = 'histogram', size = 2)
+grid.arrange(p1, p2, ncol = 2)
 ```
 
 ### > 4 sd
 
-```{r, fig.height = 5, fig.width = 5}
+```{r, fig.height = 5, fig.width = 10}
 sdup <- 4
 dcldat <- dat %>% 
   mutate(
@@ -201,9 +216,10 @@ dcldat <- dat %>%
     dclprecp = decluster(precp, unique(prcval)),    
     wtrval = mean(water, na.rm = T) + sdup * sd(water, na.rm = T),
     dclwater = decluster(water, unique(wtrval))
-  )
+  ) %>% 
+  filter(precp > prcval)
 
-p <- ggplot(dcldat, aes(x = dclwater, y = dclprecp)) +
+p1 <- ggplot(dcldat, aes(x = dclwater, y = dclprecp)) +
   geom_path(color = 'grey') + 
   geom_point(size = 2) + 
   theme_bw() + 
@@ -216,12 +232,27 @@ p <- ggplot(dcldat, aes(x = dclwater, y = dclprecp)) +
     title = bquote('Values >'~.(sdup)*sigma~'declustered')
   )
 
-ggMarginal(p, type = 'histogram', size = 2)
+p2 <-  ggplot(dcldat, aes(x = water, y = precp)) +
+  geom_path(color = 'grey') + 
+  geom_point(size = 2) + 
+  theme_bw() + 
+  theme(
+    panel.grid = element_blank()
+  ) +
+  labs(
+    x = expression(paste(W[2], ' (m, MLLW)')), 
+    y = expression(paste(P[2], ' (cm)')), 
+    title = bquote('Values >'~.(sdup)*sigma)
+  )
+
+p1 <- ggMarginal(p1, type = 'histogram', size = 2)
+p2 <- ggMarginal(p2, type = 'histogram', size = 2)
+grid.arrange(p1, p2, ncol = 2)
 ```
 
 ### > 5 sd
 
-```{r, fig.height = 5, fig.width = 5}
+```{r, fig.height = 5, fig.width = 10}
 sdup <- 5
 dcldat <- dat %>% 
   mutate(
@@ -229,9 +260,10 @@ dcldat <- dat %>%
     dclprecp = decluster(precp, unique(prcval)),    
     wtrval = mean(water, na.rm = T) + sdup * sd(water, na.rm = T),
     dclwater = decluster(water, unique(wtrval))
-  )
+  ) %>% 
+  filter(precp > prcval)
 
-p <- ggplot(dcldat, aes(x = dclwater, y = dclprecp)) +
+p1 <- ggplot(dcldat, aes(x = dclwater, y = dclprecp)) +
   geom_path(color = 'grey') + 
   geom_point(size = 2) + 
   theme_bw() + 
@@ -244,13 +276,7 @@ p <- ggplot(dcldat, aes(x = dclwater, y = dclprecp)) +
     title = bquote('Values >'~.(sdup)*sigma~'declustered')
   )
 
-ggMarginal(p, type = 'histogram', size = 2)
-```
-
-### None
-
-```{r, fig.height = 5, fig.width = 5}
-p <- ggplot(dat, aes(x = water, y = precp)) +
+p2 <-  ggplot(dcldat, aes(x = water, y = precp)) +
   geom_path(color = 'grey') + 
   geom_point(size = 2) + 
   theme_bw() + 
@@ -260,8 +286,10 @@ p <- ggplot(dat, aes(x = water, y = precp)) +
   labs(
     x = expression(paste(W[2], ' (m, MLLW)')), 
     y = expression(paste(P[2], ' (cm)')), 
-    title = 'No declustering'
+    title = bquote('Values >'~.(sdup)*sigma)
   )
 
-ggMarginal(p, type = 'histogram', size = 2)
+p1 <- ggMarginal(p1, type = 'histogram', size = 2)
+p2 <- ggMarginal(p2, type = 'histogram', size = 2)
+grid.arrange(p1, p2, ncol = 2)
 ```
