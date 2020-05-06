@@ -1,0 +1,21 @@
+---
+title: "Methods"
+output: 
+  bookdown::word_document2:
+  reference_docx: my_styles.docx
+urlcolor: blue
+link-citations: true
+---
+
+```{r eval = F, echo = F}
+spelling::spell_check_files('doc/methods.Rmd')
+```
+
+# Declustering
+
+The water level and precipitation time series were correlated at extreme values, such that high water events often followed extreme rain events.  Correlations at high values violated assumptions of independence among variables required for the Monte Carlo simulation analysis.  To satisfy the analysis assumptions, declustering of each variable was used to minimize the correlations at extreme values.  Declustering identifies clusters of excess values in a variable and replaces them with a single value, such as their maximum. The decluster function from the extRemes R package (Gilleland and Katz 2016) was used on the precipitation and water variables using the runs method (Coles 2001).  First, a definition of "extreme" was determined and then clusters were created for values above the extreme.  For runs declustering, clusters were defined using the default value of length $r = 1$, such that any values separated by fewer than $r$ non-extreme values were assigned to the same cluster.  All values in a cluster were then replaced with the maximum cluster value. Thresholds for extreme values were defined as three, four, and five times the standard deviation above the mean value of each variable. 
+
+Gilleland, E., Katz, R.W. 2016. extRemes 2.0: An Extreme Value Analysis Package in R. Journal of Statistical Software, 72(8), 1-39.
+  doi:10.18637/jss.v072.i08
+
+Coles, S. 2001. An introduction to statistical modeling of extreme values, London, U.K.: Springer-Verlag, 208 pp.
