@@ -2,7 +2,7 @@ library(tidyverse)
 library(R.matlab)
 library(here)
 library(lubridate)
-
+library(extRemes)
 
 # recreate glm ------------------------------------------------------------
 
@@ -44,3 +44,64 @@ indvar0 <- read.csv(here::here('data/data-raw/LR_final_indvar0.csv'), stringsAsF
   )
 
 save(indvar0, file = here::here('data/indvar0.RData'), compress = 'xz')
+
+# declustering data -------------------------------------------------------
+
+# import data
+indvar0 <- read.csv(here::here('data/data-raw/LR_final_indvar0.csv'), stringsAsFactors = F)
+
+# rename and format date
+dat <- indvar0 %>% 
+  select(
+    date = stime0,
+    precp = `indvar0...1.`,
+    water = `indvar0...3.`
+  ) %>% 
+  mutate(date = dmy(date))
+
+dcldat <- crossing(
+  sdup = c(3, 4, 5), 
+  vardcl = c('precp', 'precp_water')
+  ) %>% 
+  group_by(sdup, vardcl) %>% 
+  nest() %>% 
+  mutate(
+    data = purrr::pmap(list(sdup, vardcl), function(sdup, vardcl){
+
+      if(vardcl == 'precp')
+        
+        out <- dat %>% 
+          mutate(
+            fltval = mean(precp, na.rm = T) + sdup * sd(precp, na.rm = T),
+            dclprecp = decluster(precp, unique(fltval))
+          ) %>% 
+          filter(precp > fltval) %>% 
+          select(-precp, -fltval) %>% 
+          rename(precp = dclprecp)
+        
+      if(vardcl == 'precp_water')
+        
+        out <- dat %>% 
+          mutate(
+            prcval = mean(precp, na.rm = T) + sdup * sd(precp, na.rm = T),
+            dclprecp = decluster(precp, unique(prcval)),    
+            wtrval = mean(water, na.rm = T) + sdup * sd(water, na.rm = T),
+            dclwater = decluster(water, unique(wtrval))
+          ) %>% 
+          filter(precp > prcval) %>% 
+          select(-precp, -water, -prcval, -wtrval) %>% 
+          rename(
+            precp = dclprecp,
+            water = dclwater
+          )
+        
+      out <- out %>% 
+        select(date, precp, water)
+      
+      return(out)
+      
+    })
+  ) %>% 
+  unnest(data)
+
+write.csv(dcldat, here::here('data/data-raw', 'dcldat.csv'), row.names = F)
