@@ -1,5 +1,5 @@
 ---
-title: "SSO risk probabilities"
+title: "Sanitary Sewer Overflow (SSO) risk probabilities, Pinellas County, Florida"
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
@@ -17,7 +17,7 @@ library(patchwork)
 library(ShinyDash)
 library(shinydashboard)
 library(flexdashboard)
-# library(plotly)
+library(plotly)
 
 data(indvar0)
 data(rskmod)
@@ -84,44 +84,33 @@ plos <- reactive({
   # input
   prds <- prds()
   prbsel <- input$prbsel
+  dtssel <- input$dtssel
   
   toplo <- prds
-  
-  p1 <- ggplot(toplo, aes(x = date, ymax = risk)) + 
-    geom_ribbon(aes(ymin = 0), fill = 'tomato1', alpha = alph) + 
-    # geom_line(aes(y = risk), color = 'tomato1') +
-    theme_bw(base_size = 18) + 
-    scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) + 
-    scale_x_date(expand = c(0, 0)) +
-    geom_hline(yintercept = prbsel, linetype = 'dashed', size = 1) + 
-    labs(
-      x = NULL, 
-      y = 'Pr. overflow'
+
+  p1 <- plot_ly(toplo) %>%
+    add_trace(x = ~date, y = ~risk, type = 'scatter', mode = 'none', fill = 'tozeroy', fillcolor = 'red', alpha = alph) %>% 
+    add_segments(x = dtssel[1], xend = dtssel[2], y = prbsel, yend = prbsel, line = list(color = 'black', dash = 'dot'), highlight = F) %>% 
+    layout(
+      yaxis = list(title = 'Pr. risk', range = c(0, 1))
     )
   
-  p2 <- ggplot(toplo, aes(x = date, ymax = water)) + 
-    geom_ribbon(aes(ymin = 0), alpha = alph, fill = 'lightblue') +
-    # geom_line(aes(y = water), color = 'lightblue') +
-    theme_bw(base_size = 18) + 
-    scale_y_continuous(limits = c(0, 2.02), expand = c(0, 0)) + 
-    scale_x_date(expand = c(0, 0)) +
-    labs(
-      x = NULL, 
-      y = '2-day max water (m)'
+  p2 <- plot_ly(toplo, x = ~date, y = ~water, type = 'scatter', mode = 'none', fill = 'tozeroy', fillcolor = 'lightblue', alpha = alph) %>% 
+    layout(
+      yaxis = list(title = '2-day max water (m)', range = c(0, 2.02))
+    
     )
   
-  p3 <- ggplot(toplo, aes(x = date, ymax = precp)) + 
-    geom_ribbon(aes(ymin = 0), alpha = alph, fill = 'grey') + 
-    # geom_line(aes(y = precp), color = 'grey') +
-    theme_bw(base_size = 18) + 
-    scale_x_date(expand = c(0, 0)) +
-    scale_y_continuous(limits = c(0, 10.5), expand = c(0, 0)) + 
-    labs(
-      x = NULL, 
-      y = '2-day precip (cm)'
+  p3 <- plot_ly(toplo, x = ~date, y = ~precp, type = 'scatter', mode = 'none', fill = 'tozeroy', fillcolor = 'grey', alpha = alph) %>% 
+    layout(
+      yaxis = list(title = '2-day precip (cm)', range = c(0, 10.5))
     )
 
-  out <- p1 + p2 + p3 + plot_layout(ncol = 1)
+  out <- subplot(p1, p2, p3, nrows = 3, shareX = T, titleY = T, which_layout = 1) %>% 
+    layout(
+      showlegend = F, 
+      xaxis = list(title = '')
+    )
   
   return(out)
   
@@ -223,7 +212,7 @@ Row {data-height=650}
 ### 
 
 ```{r}
-output$plos <- renderPlot(plos())
-plotOutput('plos')
+output$plos <- renderPlotly(plos())
+plotlyOutput('plos')
 ```
 
