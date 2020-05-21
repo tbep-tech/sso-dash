@@ -1,5 +1,5 @@
 ---
-title: "Sanitary Sewer Overflow (SSO) risk probabilities, Pinellas County, Florida"
+title: "SANITARY SEWER OVERFLOW (SSO) RISK PROBABILITY, PINELLAS COUNTY, FLORIDA"
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
@@ -90,7 +90,7 @@ plos <- reactive({
 
   p1 <- plot_ly(toplo) %>%
     add_trace(x = ~date, y = ~risk, type = 'scatter', mode = 'none', fill = 'tozeroy', fillcolor = 'red', alpha = alph) %>% 
-    add_segments(x = dtssel[1], xend = dtssel[2], y = prbsel, yend = prbsel, line = list(color = 'black', dash = 'dot'), highlight = F) %>% 
+    add_segments(x = dtssel[1], xend = dtssel[2], y = prbsel, yend = prbsel, line = list(color = 'black', dash = 'dot')) %>% 
     layout(
       yaxis = list(title = 'Pr. risk', range = c(0, 1))
     )
@@ -128,29 +128,39 @@ output$rskdwntab <- downloadHandler(
 )
 ```
 
+Inputs {.sidebar data-width=500}
+-------------------------------------
+
+Welcome to the SSO risk assessment dashboard! This tool provides a simple user interface to assess relative risk of SSO overflows in Pinellas County, Florida.  The probability of overflow risk (top plot) is a function of coastal water level measured as the two-day maximum (middle plot) and overall precipitation measured as the two-day total (bottom plot).  A simple logistic regression model of the likelihood of overflow vs water level and precipitation provides the output for the top plot, with a user-defined probability (black dotted line) for what defines an SSO event.  The total number of SSO events, total days with events, and percentage of the selected time series with events are summarized on the top. 
+
+&nbsp;
+
 ```{r ui}
 column(12, 
-  column(3, 
-    sliderInput('dtssel', 'Select date range:', min = dts[1], max = dts[2], value = dts, timeFormat="%Y-%m", width = '600px')
-  ),       
-  column(3, 
-    sliderInput('prbsel', 'Select probability defining SSO:', min = 0, max = 1, value = 0.4, width = '600px', animate = T)
-  ),
-  column(3, 
-    sliderInput('wtrsel', 'Select 2-day max water increase (m):', min = 0, max = 0.5, value = 0.3, width = '600px', animate = T)
-  ),
-  column(3, 
-    sliderInput('prpsel', 'Select 2d-precipitation increase (cm):', min = 0, max = 1.8, value = 0.2, width = '600px', animate = T)
-  )
+  sliderInput('dtssel', 'Select date range:', min = dts[1], max = dts[2], value = dts, timeFormat="%Y-%m", width = '600px')
 )
 column(12, 
-       column(4, 
-              downloadButtonRmd('rskdwntab', 'Download data')
-              )
+  sliderInput('prbsel', 'Select probability defining SSO:', min = 0, max = 1, value = 0.4, width = '600px', animate = T)
+)
+column(12, 
+  sliderInput('wtrsel', 'Select 2-day max water increase (m):', min = 0, max = 0.5, value = 0.3, width = '600px', animate = T)
+)
+column(12, 
+  sliderInput('prpsel', 'Select 2d-precipitation increase (cm):', min = 0, max = 1.8, value = 0.2, width = '600px', animate = T)
+)
+column(12,
+  downloadButtonRmd('rskdwntab', 'Download data')
 )
 ```
 
-Row {data-height=100}
+&nbsp;
+&nbsp;
+
+This project was funded by a grant from the Tampa Bay Environmental Restoration FunD to [Dr. Mark Luther](mailto:mluther@usf.edu).  For technical questions, please contact [Dr. Steven Meyers](mailto:smeyers@mail.usf.edu) or [Dr. Marcus Beck](mailto:mbeck@tbep.org).  Source code is avaible [here](https://github.com/tbep-tech/sso-dash).
+
+[![DOI](https://zenodo.org/badge/243543298.svg)](https://zenodo.org/badge/latestdoi/243543298)
+
+Column 
 -------------------------------------
 
 ###   
