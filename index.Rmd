@@ -156,7 +156,7 @@ column(12,
 &nbsp;
 &nbsp;
 
-This project was funded by a grant from the Tampa Bay Environmental Restoration FunD to [Dr. Mark Luther](mailto:mluther@usf.edu).  For technical questions, please contact [Dr. Steven Meyers](mailto:smeyers@mail.usf.edu) or [Dr. Marcus Beck](mailto:mbeck@tbep.org).  Source code is avaible [here](https://github.com/tbep-tech/sso-dash).
+This project was funded by a grant from the Tampa Bay Environmental Restoration Fund to [Dr. Mark Luther](mailto:mluther@usf.edu).  For technical questions, please contact [Dr. Steven Meyers](mailto:smeyers@mail.usf.edu) or [Dr. Marcus Beck](mailto:mbeck@tbep.org).  Source code is avaible [here](https://github.com/tbep-tech/sso-dash).
 
 [![DOI](https://zenodo.org/badge/243543298.svg)](https://zenodo.org/badge/latestdoi/243543298)
 
