@@ -44,6 +44,8 @@ prds <- reactive({
   prpsel <- input$prpsel
   prbsel <- input$prbsel
   
+  req(dtssel)
+  
   out <- hindcastSSO(dtssel[1], dtssel[2], wtrsel, prpsel, indvar0, rskmod, prbsel)
   
   return(out)
@@ -85,6 +87,8 @@ plos <- reactive({
   prds <- prds()
   prbsel <- input$prbsel
   dtssel <- input$dtssel
+  
+  req(dtssel)
   
   toplo <- prds
 
@@ -172,7 +176,7 @@ output$evntsbox <- renderValueBox({
   evnts <- evnts()
   
   flexdashboard::valueBox(
-    evnts, "Overflow events", color = "lightblue"
+    evnts, "Overflow events", color = "red"
   )
 
 })
@@ -188,7 +192,7 @@ output$lensbox <- renderValueBox({
   lens <- lens()
   
   valueBox(
-    lens, "Overflow total duration in days", color = "lightblue"
+    lens, "Overflow total duration in days", color = "red"
   )
 
 })
@@ -198,7 +202,7 @@ valueBoxOutput('lensbox')
 ###
 
 ```{r}
-output$percbox <- renderValueBox({
+output$avgsbox <- renderValueBox({
   
   # input
   lens <- lens()
@@ -206,14 +210,14 @@ output$percbox <- renderValueBox({
   
   tots <- diff(dtssel, units = 'days')
   tots <- as.numeric(tots)
-  perc <- paste(round(100 * lens / tots, 1), '%')
+  avgs <- round(365 * lens / tots, 1)
 
   valueBox(
-    perc, "Overflow total duration in percent", color = "lightblue"
+    avgs, "Average days per year with overflow", color = "red"
   )
 
 })
-valueBoxOutput('percbox')
+valueBoxOutput('avgsbox')
 ```
 
 Row {data-height=650}
