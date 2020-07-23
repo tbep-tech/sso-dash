@@ -1,0 +1,214 @@
+---
+title: "SANITARY SEWER OVERFLOW (SSO) FUTURE RISK PROBABILITY, PINELLAS COUNTY, FLORIDA"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+runtime: shiny
+---
+  
+```{r, warning = F, message = F, echo = F}
+knitr::opts_chunk$set(echo = TRUE, warning = F, message = F, echo = F)
+
+library(shiny)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(ShinyDash)
+library(shinydashboard)
+library(flexdashboard)
+library(plotly)
+library(shinyWidgets)
+library(leaflet)
+
+data("futrsk")
+
+cols <- c('lightgreen', 'lightblue', 'tomato1')
+colfun <- colorNumeric(cols, domain = c(0, 365))
+                       
+# slider choices and steps
+wtrchc <- unique(futrsk$water)
+wtrstp <- diff(wtrchc) %>% round(2) %>% unique
+prpchc <- unique(futrsk$precp)
+prpstp <- diff(prpchc) %>% round(2) %>% unique
+prbchc <- unique(futrsk$prb)
+prbstp <- diff(prbchc) %>% round(2) %>% unique
+
+source("R/funcs.R")
+
+alph <- 0.8
+```
+
+```{r reactives}
+# predictions
+prds <- reactive({
+  
+  # inputs
+  wtrsel <- input$wtrsel
+  prpsel <- input$prpsel
+  prbsel <- input$prbsel
+
+  out <- futrsk %>% 
+    filter(water %in% wtrsel) %>% 
+    filter(precp %in% prpsel) %>% 
+    filter(prb %in% prbsel)
+  
+  return(out)
+  
+})
+
+# plot
+plos <- reactive({
+  
+  # input
+  prbsel <- input$prbsel
+  wtrsel <- input$wtrsel
+  prpsel <- input$prpsel
+  
+  ptplo <- data.frame(
+    water = wtrsel, 
+    precp = prpsel
+  )
+  
+  toplo <- futrsk %>% 
+    filter(prb %in% prbsel) %>% 
+    gather('var', 'val', N_d, los, his) %>% 
+    mutate(
+      var = factor(var, levels = c('los', 'N_d', 'his'), labels = c('Lower', 'Average', 'Upper'))
+    )
+
+  p <- ggplot(toplo, aes(x = water, y = precp)) + 
+    geom_tile(aes(fill = val)) +
+    geom_point(data = ptplo, size = 6) +
+    scale_y_continuous(expand = c(0,0)) + 
+    scale_x_continuous(expand = c(0,0)) + 
+    facet_wrap(~var, ncol = 3) +
+    scale_fill_gradientn('Days/yr', limits = c(0, 365), colours = cols) + 
+    theme_bw(base_size = 16) +
+    theme(
+      strip.background = element_blank(), 
+      legend.position = 'top'
+    ) + 
+    labs(
+      x = '2-day max water (m)', 
+      y = '2-day precip (cm)'
+      ) + 
+    guides(fill = guide_colourbar(barwidth = 25, barheight = 1))
+
+  # out <- ggplotly(p)
+  
+  return(p)
+  
+})
+```
+
+```{r downloadhandlers}
+# risk predictions
+output$rskdwntab <- downloadHandler(
+  filename = function(){'futriskdat.csv'},
+  content = function(file){
+    write.csv(futrsk, file, quote = T, row.names = F)
+  }
+)
+```
+
+Inputs {.sidebar data-width=500}
+-------------------------------------
+
+Welcome to the SSO future risk assessment dashboard! This tool provides a simple user interface to assess relative risk of future SSO overflows in Pinellas County, Florida.  The probability of overflow risk is a function of coastal water level measured as the two-day maximum and overall precipitation measured as the two-day total.  A simple logistic regression model of the likelihood of overflow vs water level and precipitation provides an estimate of overflow risk, with a user-defined probability for what defines an SSO event.  The future risk is shown as the average number of days per year (+/- 95% confidence interval) for the selected user inputs based on multiple simulated time series over a 200 year period from the present.
+
+&nbsp;
+
+```{r ui}
+column(12, 
+  sliderInput('prbsel', 'Select probability defining SSO:', min = min(prbchc), max = max(prbchc), value = prbchc[4], step = prbstp, width = '600px', animate = T)
+)
+column(12, 
+  sliderInput('wtrsel', 'Select 2-day max water increase (m):', min = min(wtrchc), max = max(wtrchc), value = min(wtrchc), step = wtrstp, width = '600px', animate = T)
+)
+column(12, 
+  sliderInput('prpsel', 'Select 2d-precipitation increase (cm):', min = min(prpchc), max = max(prpchc), value = min(prpchc), step = prpstp, width = '600px', animate = T)
+)
+column(12,
+  downloadBttn('rskdwntab', 'Download data', style = 'simple', block = T)
+)
+```
+
+&nbsp;
+&nbsp;
+
+This project was funded by a grant from the Tampa Bay Environmental Restoration Fund to [Dr. Mark Luther](mailto:mluther@usf.edu).  For technical questions, please contact [Dr. Steven Meyers](mailto:smeyers@mail.usf.edu) or [Dr. Marcus Beck](mailto:mbeck@tbep.org).  Source code is avaible [here](https://github.com/tbep-tech/sso-dash).
+
+[![DOI](https://zenodo.org/badge/243543298.svg)](https://zenodo.org/badge/latestdoi/243543298)
+
+Column 
+-------------------------------------
+
+###
+
+```{r}
+output$lowsbox <- renderValueBox({
+  
+  # input
+  prds <- prds()
+
+  los <- prds$los
+  los <- round(los, 2)
+  
+  valueBox(
+    los, "Minimum average days per year with overflow (lower 95% CI)", color = colfun(los)
+  )
+
+})
+valueBoxOutput('lowsbox')
+```
+
+###   
+   
+```{r}
+output$avesbox <- renderValueBox({
+  
+  # input
+  prds <- prds()
+  
+  N_d <- prds$N_d
+  N_d <- round(N_d, 2)
+  
+  flexdashboard::valueBox(
+    N_d, "Average days per year with overflow", color = colfun(N_d)
+  )
+
+})
+valueBoxOutput('avesbox')
+```
+
+###
+
+```{r}
+output$highbox <- renderValueBox({
+  
+  # input
+  prds <- prds()
+  
+  his <- prds$his
+  his <- round(his, 2)
+
+  valueBox(
+    his, "Maximum average days per year with overflow (upper 95% CI)", color = colfun(his)
+  )
+
+})
+valueBoxOutput('highbox')
+```
+
+Row {data-height=650}
+-------------------------------------
+
+### 
+
+```{r}
+output$plos <- renderPlot(plos())
+
+plotOutput('plos')
+
+```
+

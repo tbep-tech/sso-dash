@@ -113,7 +113,15 @@ futrsk <- read.csv('data/data-raw/SSO_SLR_LookupC0.csv') %>%
     water = SLR..m., 
     precp = Pchng..cm., 
     prb = pi
-  )
+  ) %>% 
+  mutate(
+    water = round(water, 2), 
+    precp = round(precp, 1),
+    prb = round(prb, 1),
+    los = N_d - 1.96 * SE,
+    his = N_d + 1.96 * SE
+  ) %>% 
+  select(-SE, -SD)
 
 save(futrsk, file = 'data/futrsk.RData')
 
