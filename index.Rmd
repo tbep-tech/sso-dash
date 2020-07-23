@@ -13,7 +13,7 @@ library(shiny)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
-library(patchwork)
+library(shinyWidgets)
 library(ShinyDash)
 library(shinydashboard)
 library(flexdashboard)
@@ -26,12 +26,6 @@ source("R/funcs.R")
 
 alph <- 0.8
 dts <- range(indvar0$date)
-
-downloadButtonRmd <- function (outputId, label = "Download", class = NULL, ...)  {
-  tags$a(id = outputId, class = paste("btn btn-default shiny-download-link", 
-                                      class), href = "", target = "_blank", download = NA, 
-         icon("download"), label, ...)
-}
 ```
 
 ```{r reactives}
@@ -153,7 +147,7 @@ column(12,
   sliderInput('prpsel', 'Select 2d-precipitation increase (cm):', min = 0, max = 1.8, value = 0.2, width = '600px', animate = T)
 )
 column(12,
-  downloadButtonRmd('rskdwntab', 'Download data')
+  downloadBttn('rskdwntab', 'Download data', style = 'simple', block = T)
 )
 ```
 
