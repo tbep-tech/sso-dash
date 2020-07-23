@@ -105,3 +105,15 @@ dcldat <- crossing(
   unnest(data)
 
 write.csv(dcldat, here::here('data/data-raw', 'dcldat.csv'), row.names = F)
+
+# future risk output ------------------------------------------------------
+
+futrsk <- read.csv('data/data-raw/SSO_SLR_LookupC0.csv') %>% 
+  rename(
+    water = SLR..m., 
+    precp = Pchng..cm., 
+    prb = pi
+  )
+
+save(futrsk, file = 'data/futrsk.RData')
+
