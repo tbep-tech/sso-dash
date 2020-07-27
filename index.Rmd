@@ -129,7 +129,7 @@ output$rskdwntab <- downloadHandler(
 Inputs {.sidebar data-width=500}
 -------------------------------------
 
-Welcome to the SSO risk assessment dashboard! This tool provides a simple user interface to assess relative risk of SSO overflows in Pinellas County, Florida.  The probability of overflow risk (top plot) is a function of coastal water level measured as the two-day maximum (middle plot) and overall precipitation measured as the two-day total (bottom plot).  A simple logistic regression model of the likelihood of overflow vs water level and precipitation provides the output for the top plot, with a user-defined probability (black dotted line) for what defines an SSO event.  The total number of SSO events, total days with events, and percentage of the selected time series with events are summarized on the top. 
+Welcome to the SSO risk assessment dashboard! This tool provides a simple user interface to assess relative risk of SSO overflows in Pinellas County, Florida.  The probability of overflow risk (top plot) is a function of coastal water level measured as the two-day maximum (middle plot) and overall precipitation measured as the two-day total (bottom plot).  A logistic regression model of the likelihood of overflow vs water level and precipitation provides the output for the top plot, with a user-defined probability (black dotted line) for what defines an SSO event.  The total number of SSO events, total days with events, and percentage of the selected time series with events are summarized on the top. 
 
 &nbsp;
 

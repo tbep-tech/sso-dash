@@ -23,7 +23,7 @@ library(leaflet)
 data("futrsk")
 data("futyly")
 
-cols <- c('lightgreen', 'lightblue', 'tomato1')
+cols <- c('grey', 'lightblue', 'tomato1')
 colfun <- colorNumeric(cols, domain = c(0, 365))
                        
 # slider choices and steps
@@ -123,14 +123,15 @@ tsplo <- reactive({
   
   # input
   ylyprds <- ylyprds()
+  prds <- prds()
   
   toplo <- ylyprds
   
   p <- plot_ly(toplo) %>%
-    add_trace(x = ~yr, y = ~ndays, type = 'scatter', mode = 'none', fill = 'tozeroy', fillcolor = 'red', alpha = alph) %>% 
+    add_trace(x = ~yr, y = ~ndays, type = 'scatter', mode = 'none', fill = 'tozeroy', fillcolor = colfun(prds$N_d), alpha = 0.4) %>% 
     layout(
-      yaxis = list(title = 'No. of events per year', range = c(0, 365)), 
-      xaxis = list(title = 'Years from present')
+      yaxis = list(title = 'No. of events per year'),#, range = c(0, 365)), 
+      xaxis = list(title = 'Simulated years')
     )
   
   return(p)
@@ -151,7 +152,7 @@ output$rskdwntab <- downloadHandler(
 Inputs {.sidebar data-width=500}
 -------------------------------------
 
-Welcome to the SSO future risk assessment dashboard! This tool provides a simple user interface to assess relative risk of future SSO overflows in Pinellas County, Florida.  The probability of overflow risk is a function of coastal water level measured as the two-day maximum and overall precipitation measured as the two-day total.  A simple logistic regression model of the likelihood of overflow vs water level and precipitation provides an estimate of overflow risk, with a user-defined probability for what defines an SSO event.  The future risk is shown as the average number of days per year (+/- 95% confidence interval) for the selected user inputs based on multiple simulated time series over a 200 year period from the present. The plots show the estimated lower confidence interval, average, and upper confidence interval for the 200 year period in the top three panels.  The bottom plot shows the total simulated number of days in each year with overflow events for a 200 year period.  
+Welcome to the SSO future risk assessment dashboard! This tool provides a simple user interface to assess relative risk of future SSO overflows in Pinellas County, Florida.  The probability of overflow risk is a function of coastal water level measured as the two-day maximum and overall precipitation measured as the two-day total.  A logistic regression model of the likelihood of overflow vs water level and precipitation provides an estimate of overflow risk, with a user-defined probability for what defines an SSO event.  The future risk is shown as the average number of days per year (+/- 95% confidence interval) for the selected user inputs based on multiple simulated time series over a 200 year period. The plots show the estimated lower confidence interval, average, and upper confidence interval for the 200 year period in the top three panels.  The bottom plot shows the total simulated number of days in each year with overflow events for a 200 year period.  
 
 &nbsp;
 
