@@ -125,3 +125,20 @@ futrsk <- read.csv('data/data-raw/SSO_SLR_LookupC0.csv') %>%
 
 save(futrsk, file = 'data/futrsk.RData')
 
+# future probabilities by total per day -----------------------------------
+
+# futdlyraw <- readMat('~/Desktop/SSO_SLR_Lookup0.mat')
+# 
+# futdly <- futdlyraw %>% 
+#   .[[1]]
+
+futyly <- read.csv(here::here('data/data-raw/SSO_SLR_yearly0.csv'), skip = 2)
+names(futyly)[1:203] <- c('water', 'precp', 'prb', 1:200)
+futyly <- futyly %>% 
+  select(-X, -X.1) %>% 
+  gather('yr', 'ndays', -water, -precp, -prb) %>% 
+  mutate(
+    yr = as.numeric(yr)
+  )
+
+save(futyly, file = here::here('data/futyly.RData'), compress = 'xz')

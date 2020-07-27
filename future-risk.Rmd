@@ -21,6 +21,7 @@ library(shinyWidgets)
 library(leaflet)
 
 data("futrsk")
+data("futyly")
 
 cols <- c('lightgreen', 'lightblue', 'tomato1')
 colfun <- colorNumeric(cols, domain = c(0, 365))
@@ -39,7 +40,7 @@ alph <- 0.8
 ```
 
 ```{r reactives}
-# predictions
+# predictions summary
 prds <- reactive({
   
   # inputs
@@ -48,6 +49,23 @@ prds <- reactive({
   prbsel <- input$prbsel
 
   out <- futrsk %>% 
+    filter(water %in% wtrsel) %>% 
+    filter(precp %in% prpsel) %>% 
+    filter(prb %in% prbsel)
+  
+  return(out)
+  
+})
+
+# yearly prediction summary
+ylyprds <- reactive({
+  
+  # inputs
+  wtrsel <- input$wtrsel
+  prpsel <- input$prpsel
+  prbsel <- input$prbsel
+  
+  out <- futyly %>% 
     filter(water %in% wtrsel) %>% 
     filter(precp %in% prpsel) %>% 
     filter(prb %in% prbsel)
@@ -99,6 +117,25 @@ plos <- reactive({
   return(p)
   
 })
+
+# annual time series plots
+tsplo <- reactive({
+  
+  # input
+  ylyprds <- ylyprds()
+  
+  toplo <- ylyprds
+  
+  p <- plot_ly(toplo) %>%
+    add_trace(x = ~yr, y = ~ndays, type = 'scatter', mode = 'none', fill = 'tozeroy', fillcolor = 'red', alpha = alph) %>% 
+    layout(
+      yaxis = list(title = 'No. of events per year', range = c(0, 365)), 
+      xaxis = list(title = 'Years from present')
+    )
+  
+  return(p)
+  
+})
 ```
 
 ```{r downloadhandlers}
@@ -114,7 +151,7 @@ output$rskdwntab <- downloadHandler(
 Inputs {.sidebar data-width=500}
 -------------------------------------
 
-Welcome to the SSO future risk assessment dashboard! This tool provides a simple user interface to assess relative risk of future SSO overflows in Pinellas County, Florida.  The probability of overflow risk is a function of coastal water level measured as the two-day maximum and overall precipitation measured as the two-day total.  A simple logistic regression model of the likelihood of overflow vs water level and precipitation provides an estimate of overflow risk, with a user-defined probability for what defines an SSO event.  The future risk is shown as the average number of days per year (+/- 95% confidence interval) for the selected user inputs based on multiple simulated time series over a 200 year period from the present.
+Welcome to the SSO future risk assessment dashboard! This tool provides a simple user interface to assess relative risk of future SSO overflows in Pinellas County, Florida.  The probability of overflow risk is a function of coastal water level measured as the two-day maximum and overall precipitation measured as the two-day total.  A simple logistic regression model of the likelihood of overflow vs water level and precipitation provides an estimate of overflow risk, with a user-defined probability for what defines an SSO event.  The future risk is shown as the average number of days per year (+/- 95% confidence interval) for the selected user inputs based on multiple simulated time series over a 200 year period from the present. The plots show the estimated lower confidence interval, average, and upper confidence interval for the 200 year period in the top three panels.  The bottom plot shows the total simulated number of days in each year with overflow events for a 200 year period.  
 
 &nbsp;
 
@@ -123,10 +160,10 @@ column(12,
   sliderInput('prbsel', 'Select probability defining SSO:', min = min(prbchc), max = max(prbchc), value = prbchc[4], step = prbstp, width = '600px', animate = T)
 )
 column(12, 
-  sliderInput('wtrsel', 'Select 2-day max water increase (m):', min = min(wtrchc), max = max(wtrchc), value = min(wtrchc), step = wtrstp, width = '600px', animate = T)
+  sliderInput('wtrsel', 'Select 2-day max water increase (m):', min = min(wtrchc), max = max(wtrchc), value = wtrchc[16], step = wtrstp, width = '600px', animate = T)
 )
 column(12, 
-  sliderInput('prpsel', 'Select 2d-precipitation increase (cm):', min = min(prpchc), max = max(prpchc), value = min(prpchc), step = prpstp, width = '600px', animate = T)
+  sliderInput('prpsel', 'Select 2d-precipitation increase (cm):', min = min(prpchc), max = max(prpchc), value = prpchc[13], step = prpstp, width = '600px', animate = T)
 )
 column(12,
   downloadBttn('rskdwntab', 'Download data', style = 'simple', block = T)
@@ -136,7 +173,7 @@ column(12,
 &nbsp;
 &nbsp;
 
-This project was funded by a grant from the Tampa Bay Environmental Restoration Fund to [Dr. Mark Luther](mailto:mluther@usf.edu).  For technical questions, please contact [Dr. Steven Meyers](mailto:smeyers@mail.usf.edu) or [Dr. Marcus Beck](mailto:mbeck@tbep.org).  Source code is avaible [here](https://github.com/tbep-tech/sso-dash).
+This project was funded by a grant from the Tampa Bay Environmental Restoration Fund to [Dr. Mark Luther](mailto:mluther@usf.edu).  For technical questions, please contact [Dr. Steven Meyers](mailto:smeyers@mail.usf.edu) or [Dr. Marcus Beck](mailto:mbeck@tbep.org).  Source code is available [here](https://github.com/tbep-tech/sso-dash).
 
 [![DOI](https://zenodo.org/badge/243543298.svg)](https://zenodo.org/badge/latestdoi/243543298)
 
@@ -207,8 +244,10 @@ Row {data-height=650}
 
 ```{r}
 output$plos <- renderPlot(plos())
-
-plotOutput('plos')
-
+output$tsplo <- renderPlotly(tsplo())
+fillCol(
+  plotOutput('plos'),
+  plotlyOutput('tsplo')
+)
 ```
 
