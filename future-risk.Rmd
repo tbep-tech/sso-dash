@@ -31,7 +31,7 @@ prpstp <- diff(prpchc) %>% round(2) %>% unique
 prbchc <- unique(futrsk$prb) %>% sort
 prbstp <- diff(prbchc) %>% round(2) %>% unique
 
-cols <- c('grey', 'lightblue', 'tomato1')
+cols <- c('pink', 'red')#c('grey', 'lightblue', 'tomato1')
 colfun <- colorNumeric(cols, domain = c(0, max(futrsk$his)))
 source("R/funcs.R")
 
