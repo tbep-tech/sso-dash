@@ -107,23 +107,23 @@ dcldat <- crossing(
 write.csv(dcldat, here::here('data/data-raw', 'dcldat.csv'), row.names = F)
 
 # future risk output ------------------------------------------------------
-
-futrsk <- read.csv('data/data-raw/SSO_SLR_LookupC0.csv') %>% 
-  rename(
-    water = SLR..m., 
-    precp = Pchng..cm., 
-    prb = pi
-  ) %>% 
-  mutate(
-    water = round(water, 2), 
-    precp = round(precp, 1),
-    prb = round(prb, 1),
-    los = N_d - 1.96 * SE,
-    his = N_d + 1.96 * SE
-  ) %>% 
-  select(-SE, -SD)
-
-save(futrsk, file = 'data/futrsk.RData')
+# 
+# futrsk <- read.csv('data/data-raw/SSO_SLR_LookupC0.csv') %>% 
+#   rename(
+#     water = SLR..m., 
+#     precp = Pchng..cm., 
+#     prb = pi
+#   ) %>% 
+#   mutate(
+#     water = round(water, 2), 
+#     precp = round(precp, 1),
+#     prb = round(prb, 1),
+#     los = N_d - 1.96 * SE,
+#     his = N_d + 1.96 * SE
+#   ) %>% 
+#   select(-SE, -SD)
+# 
+# save(futrsk, file = 'data/futrsk.RData')
 
 # future probabilities by total per day -----------------------------------
 
@@ -132,13 +132,23 @@ save(futrsk, file = 'data/futrsk.RData')
 # futdly <- futdlyraw %>% 
 #   .[[1]]
 
-futyly <- read.csv(here::here('data/data-raw/SSO_SLR_yearly0.csv'), skip = 2)
+futyly <- read.csv(here::here('data/data-raw/SSO_SLR_yearly1.csv'), skip = 1, header = F)
+futyly <- futyly[-1, 1:203]
 names(futyly)[1:203] <- c('water', 'precp', 'prb', 1:200)
 futyly <- futyly %>% 
-  select(-X, -X.1) %>% 
   gather('yr', 'ndays', -water, -precp, -prb) %>% 
   mutate(
     yr = as.numeric(yr)
+  ) %>% 
+  mutate_all(as.numeric)
+
+futrsk <- futyly %>% 
+  group_by(water, precp, prb) %>% 
+  summarise(
+    N_d = mean(ndays),
+    los = t.test(ndays)$conf.int[1], 
+    his = t.test(ndays)$conf.int[2]
   )
 
 save(futyly, file = here::here('data/futyly.RData'), compress = 'xz')
+save(futrsk, file = here::here('data/futrsk.RData'), compress = 'xz')

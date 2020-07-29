@@ -95,7 +95,7 @@ plos <- reactive({
   
   p2 <- plot_ly(toplo, x = ~date, y = ~water, type = 'scatter', mode = 'none', fill = 'tozeroy', fillcolor = 'lightblue', alpha = alph) %>% 
     layout(
-      yaxis = list(title = '2-day max water (m)', range = c(0, 2.02))
+      yaxis = list(title = '2-day max sea level (m)', range = c(0, 2.02))
     
     )
   
@@ -129,7 +129,7 @@ output$rskdwntab <- downloadHandler(
 Inputs {.sidebar data-width=500}
 -------------------------------------
 
-Welcome to the SSO risk assessment dashboard! This tool provides a simple user interface to assess relative risk of SSO overflows in Pinellas County, Florida.  The probability of overflow risk (top plot) is a function of coastal water level measured as the two-day maximum (middle plot) and overall precipitation measured as the two-day total (bottom plot).  A logistic regression model of the likelihood of overflow vs water level and precipitation provides the output for the top plot, with a user-defined probability (black dotted line) for what defines an SSO event.  The total number of SSO events, total days with events, and percentage of the selected time series with events are summarized on the top. 
+Welcome to the SSO risk assessment dashboard! This tool provides a simple user interface to assess relative risk of SSO overflows in Pinellas County, Florida.  The probability of overflow risk (top plot) is a function of sea level measured as the two-day maximum (middle plot) and overall precipitation measured as the two-day total (bottom plot).  A logistic regression model of the likelihood of overflow vs sea level and precipitation provides the output for the top plot, with a user-defined probability (black dotted line) for what defines an SSO event.  The total number of SSO events, total days with events, and percentage of the selected time series with events are summarized on the top. 
 
 &nbsp;
 
@@ -141,7 +141,7 @@ column(12,
   sliderInput('prbsel', 'Select probability defining SSO:', min = 0, max = 1, value = 0.4, width = '600px', animate = T)
 )
 column(12, 
-  sliderInput('wtrsel', 'Select 2-day max water increase (m):', min = 0, max = 0.5, value = 0.3, width = '600px', animate = T)
+  sliderInput('wtrsel', 'Select 2-day max sea level increase (m):', min = 0, max = 0.5, value = 0.3, width = '600px', animate = T)
 )
 column(12, 
   sliderInput('prpsel', 'Select 2d-precipitation increase (cm):', min = 0, max = 1.8, value = 0.2, width = '600px', animate = T)

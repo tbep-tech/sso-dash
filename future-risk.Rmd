@@ -22,18 +22,17 @@ library(leaflet)
 
 data("futrsk")
 data("futyly")
-
-cols <- c('grey', 'lightblue', 'tomato1')
-colfun <- colorNumeric(cols, domain = c(0, 365))
                        
 # slider choices and steps
-wtrchc <- unique(futrsk$water)
+wtrchc <- unique(futrsk$water) %>% sort
 wtrstp <- diff(wtrchc) %>% round(2) %>% unique
-prpchc <- unique(futrsk$precp)
+prpchc <- unique(futrsk$precp) %>% sort
 prpstp <- diff(prpchc) %>% round(2) %>% unique
-prbchc <- unique(futrsk$prb)
+prbchc <- unique(futrsk$prb) %>% sort
 prbstp <- diff(prbchc) %>% round(2) %>% unique
 
+cols <- c('grey', 'lightblue', 'tomato1')
+colfun <- colorNumeric(cols, domain = c(0, max(futrsk$his)))
 source("R/funcs.R")
 
 alph <- 0.8
@@ -100,14 +99,14 @@ plos <- reactive({
     scale_y_continuous(expand = c(0,0)) + 
     scale_x_continuous(expand = c(0,0)) + 
     facet_wrap(~var, ncol = 3) +
-    scale_fill_gradientn('Days/yr', limits = c(0, 365), colours = cols) + 
+    scale_fill_gradientn('Days/yr', limits = c(0, max(futrsk$his)), colours = cols) + 
     theme_bw(base_size = 16) +
     theme(
       strip.background = element_blank(), 
       legend.position = 'top'
     ) + 
     labs(
-      x = '2-day max water (m)', 
+      x = '2-day max sea level (m)', 
       y = '2-day precip (cm)'
       ) + 
     guides(fill = guide_colourbar(barwidth = 25, barheight = 1))
@@ -152,7 +151,7 @@ output$rskdwntab <- downloadHandler(
 Inputs {.sidebar data-width=500}
 -------------------------------------
 
-Welcome to the SSO future risk assessment dashboard! This tool provides a simple user interface to assess relative risk of future SSO overflows in Pinellas County, Florida.  The probability of overflow risk is a function of coastal water level measured as the two-day maximum and overall precipitation measured as the two-day total.  A logistic regression model of the likelihood of overflow vs water level and precipitation provides an estimate of overflow risk, with a user-defined probability for what defines an SSO event.  The future risk is shown as the average number of days per year (+/- 95% confidence interval) for the selected user inputs based on multiple simulated time series over a 200 year period. The plots show the estimated lower confidence interval, average, and upper confidence interval for the 200 year period in the top three panels.  The bottom plot shows the total simulated number of days in each year with overflow events for a 200 year period.  
+Welcome to the SSO future risk assessment dashboard! This tool provides a simple user interface to assess relative risk of future SSO overflows in Pinellas County, Florida.  The probability of overflow risk is a function of sea level measured as the two-day maximum and overall precipitation measured as the two-day total.  A logistic regression model of the likelihood of overflow vs sea level and precipitation provides an estimate of overflow risk, with a user-defined probability for what defines an SSO event. The "present day" rate of compound flooding SSO events is 6 events over 19 years. The future risk is shown as the average number of days per year (+/- 95% confidence interval) for the selected user inputs based on multiple simulated time series over a 200 year period. The plots show the estimated lower confidence interval, average, and upper confidence interval for the 200 year period in the top three panels. The bottom plot shows the total simulated number of days in each year with overflow events for a 200 year period. 
 
 &nbsp;
 
@@ -161,10 +160,10 @@ column(12,
   sliderInput('prbsel', 'Select probability defining SSO:', min = min(prbchc), max = max(prbchc), value = prbchc[4], step = prbstp, width = '600px', animate = T)
 )
 column(12, 
-  sliderInput('wtrsel', 'Select 2-day max water increase (m):', min = min(wtrchc), max = max(wtrchc), value = wtrchc[16], step = wtrstp, width = '600px', animate = T)
+  sliderInput('wtrsel', 'Select 2-day max sea level increase (m):', min = min(wtrchc), max = max(wtrchc), value = max(wtrchc), step = wtrstp, width = '600px', animate = T)
 )
 column(12, 
-  sliderInput('prpsel', 'Select 2d-precipitation increase (cm):', min = min(prpchc), max = max(prpchc), value = prpchc[13], step = prpstp, width = '600px', animate = T)
+  sliderInput('prpsel', 'Select 2d-precipitation increase (cm):', min = min(prpchc), max = max(prpchc), value = max(prpchc), step = prpstp, width = '600px', animate = T)
 )
 column(12,
   downloadBttn('rskdwntab', 'Download data', style = 'simple', block = T)
