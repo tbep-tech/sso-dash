@@ -6,7 +6,7 @@ Shiny dashboard to view risk of sanity sewer overflow events in Pinellas Co
 
 ## Links
 
-* Hindcast [Dashboard](https://shiny.tbeptech.org/sso-dash/)
-* Forecast [Dashboard](https://shiny.tbeptech.org/sso-dash/future-risk.Rmd)
+* Hindcast [Dashboard](https://shiny.tbep.org/sso-dash/)
+* Forecast [Dashboard](https://shiny.tbep.org/sso-dash/future-risk.Rmd)
 * Assessing GLM fit for reproduced logistic model of overflow risk [link](https://tbep-tech.github.io/sso-dash/glmfit)
 * Declustering extreme values of water, precip [link](https://tbep-tech.github.io/sso-dash/declustering)
