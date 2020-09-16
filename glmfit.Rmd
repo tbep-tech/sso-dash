@@ -31,7 +31,12 @@ dat <- bind_cols(depvar0, indvar0) %>%
     var4 = `indvar0...4.`, 
     date = stime0
   ) %>% 
-  mutate(date = dmy(date))
+  mutate(date = dmy(date)) %>% 
+  mutate(
+    precp = precp * 2.54, 
+    var2 = var2 * 2.54, 
+    var4 = var4 * 2.54 
+  )
 
 # remove all records where water < mean water level
 dat <- dat %>% 

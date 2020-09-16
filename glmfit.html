@@ -387,7 +387,12 @@ dat &lt;- bind_cols(depvar0, indvar0) %&gt;%
     var4 = `indvar0...4.`, 
     date = stime0
   ) %&gt;% 
-  mutate(date = dmy(date))
+  mutate(date = dmy(date)) %&gt;% 
+  mutate(
+    precp = precp * 2.54, 
+    var2 = var2 * 2.54, 
+    var4 = var4 * 2.54 
+  )
 
 # remove all records where water &lt; mean water level
 dat &lt;- dat %&gt;% 
@@ -422,10 +427,10 @@ summary(mod)</code></pre>
 ## Coefficients:
 ##              Estimate Std. Error z value Pr(&gt;|z|)  
 ## (Intercept) -48.31189   20.17226  -2.395   0.0166 *
-## precp        10.86320    4.76004   2.282   0.0225 *
+## precp         4.27685    1.87403   2.282   0.0225 *
 ## water        26.22244   13.58764   1.930   0.0536 .
-## var2          0.21642    0.09362   2.312   0.0208 *
-## var4         -6.89659    3.26353  -2.113   0.0346 *
+## var2          0.08520    0.03686   2.312   0.0208 *
+## var4         -2.71519    1.28485  -2.113   0.0346 *
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 

@@ -11,6 +11,8 @@ indvar0 <- read.csv(here::here('data/data-raw/LR_final_indvar0.csv'), stringsAsF
 depvar0 <- read.csv(here::here('data/data-raw/LR_final_depvar0.csv'), stringsAsFactors = F)
 
 # combine independent, dependent, rename some things
+# all precip related variables (including interaction) are in inches and converted to cm
+# precp is p2, water is w2, var2 is p90, var4 is x2 (interaction)
 dat <- bind_cols(depvar0, indvar0) %>% 
   select(
     overflow = DepVar, 
@@ -20,7 +22,12 @@ dat <- bind_cols(depvar0, indvar0) %>%
     var4 = `indvar0...4.`, 
     date = stime0
   ) %>% 
-  mutate(date = dmy(date))
+  mutate(
+    date = dmy(date),
+    precp = precp * 2.54, 
+    var2 = var2 * 2.54, 
+    var4 = var4 * 2.54 
+  )
 
 # remove all records where water < mean water level
 dat <- dat %>% 
@@ -33,6 +40,8 @@ save(rskmod, file = here::here('data/rskmod.RData'), compress = 'xz')
 
 # model data --------------------------------------------------------------
 
+# all precip related variables (including interaction) are in inches and converted to cm
+# precp is p2, water is w2, var2 is p90, var4 is x2 (interaction)
 indvar0 <- read.csv(here::here('data/data-raw/LR_final_indvar0.csv'), stringsAsFactors = F) %>% 
   mutate(stime0 = dmy(stime0)) %>% 
   rename(
@@ -41,7 +50,13 @@ indvar0 <- read.csv(here::here('data/data-raw/LR_final_indvar0.csv'), stringsAsF
     water = `indvar0...3.`, 
     var4 = `indvar0...4.`, 
     date = stime0
+  ) %>% 
+  mutate(
+    precp = precp * 2.54, 
+    var2 = var2 * 2.54, 
+    var4 = var4 * 2.54 
   )
+
 
 save(indvar0, file = here::here('data/indvar0.RData'), compress = 'xz')
 
@@ -57,7 +72,10 @@ dat <- indvar0 %>%
     precp = `indvar0...1.`,
     water = `indvar0...3.`
   ) %>% 
-  mutate(date = dmy(date))
+  mutate(
+    date = dmy(date),
+    precp = 2.54 * precp
+    )
 
 dcldat <- crossing(
   sdup = c(3, 4, 5), 
@@ -73,7 +91,7 @@ dcldat <- crossing(
         out <- dat %>% 
           mutate(
             fltval = mean(precp, na.rm = T) + sdup * sd(precp, na.rm = T),
-            dclprecp = decluster(precp, unique(fltval))
+            dclprecp = as.numeric(decluster(precp, unique(fltval)))
           ) %>% 
           filter(precp > fltval) %>% 
           select(-precp, -fltval) %>% 
@@ -84,9 +102,9 @@ dcldat <- crossing(
         out <- dat %>% 
           mutate(
             prcval = mean(precp, na.rm = T) + sdup * sd(precp, na.rm = T),
-            dclprecp = decluster(precp, unique(prcval)),    
+            dclprecp = as.numeric(decluster(precp, unique(prcval))),    
             wtrval = mean(water, na.rm = T) + sdup * sd(water, na.rm = T),
-            dclwater = decluster(water, unique(wtrval))
+            dclwater = as.numeric(decluster(water, unique(wtrval)))
           ) %>% 
           filter(precp > prcval) %>% 
           select(-precp, -water, -prcval, -wtrval) %>% 

@@ -101,7 +101,7 @@ plos <- reactive({
   
   p3 <- plot_ly(toplo, x = ~date, y = ~precp, type = 'scatter', mode = 'none', fill = 'tozeroy', fillcolor = 'grey', alpha = alph) %>% 
     layout(
-      yaxis = list(title = '2-day precip (cm)', range = c(0, 10.5))
+      yaxis = list(title = '2-day precip (cm)', range = c(0, 20))
     )
 
   out <- subplot(p1, p2, p3, nrows = 3, shareX = T, titleY = T, which_layout = 1) %>% 
