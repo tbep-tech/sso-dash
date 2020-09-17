@@ -155,10 +155,10 @@ futyly <- futyly[-1, 1:203]
 names(futyly)[1:203] <- c('water', 'precp', 'prb', 1:200)
 futyly <- futyly %>% 
   gather('yr', 'ndays', -water, -precp, -prb) %>% 
+  mutate_all(as.numeric) %>% 
   mutate(
-    yr = as.numeric(yr)
-  ) %>% 
-  mutate_all(as.numeric)
+    precp = 2.54 * precp
+  ) 
 
 futrsk <- futyly %>% 
   group_by(water, precp, prb) %>% 
