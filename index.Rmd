@@ -186,7 +186,7 @@ output$lensbox <- renderValueBox({
   lens <- lens()
   
   valueBox(
-    lens, "Overflow total duration in days", color = "red"
+    lens, "Days with overflow", color = "red"
   )
 
 })
