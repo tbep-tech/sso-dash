@@ -160,10 +160,10 @@ column(12,
   sliderInput('prbsel', 'Select probability defining SSO:', min = min(prbchc), max = max(prbchc), value = prbchc[4], step = prbstp, width = '600px', animate = T)
 )
 column(12, 
-  sliderInput('wtrsel', 'Select 2-day max sea level increase (m):', min = min(wtrchc), max = max(wtrchc), value = max(wtrchc), step = wtrstp, width = '600px', animate = T)
+  sliderInput('wtrsel', 'Select 2-day max sea level increase (m):', min = min(wtrchc), max = max(wtrchc), value = min(wtrchc), step = wtrstp, width = '600px', animate = T)
 )
 column(12, 
-  sliderInput('prpsel', 'Select 2d-precipitation increase (cm):', min = min(prpchc), max = max(prpchc), value = max(prpchc), step = prpstp, width = '600px', animate = T)
+  sliderInput('prpsel', 'Select 2d-precipitation increase (cm):', min = min(prpchc), max = max(prpchc), value = min(prpchc), step = prpstp, width = '600px', animate = T)
 )
 column(12,
   downloadBttn('rskdwntab', 'Download data', style = 'simple', block = T)
