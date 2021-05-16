@@ -3,6 +3,10 @@ title: "SANITARY SEWER OVERFLOW (SSO) RISK PROBABILITY, PINELLAS COUNTY, FLORIDA
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
+    social: menu
+    source_code: "https://github.com/tbep-tech/sso-dash"
+    includes: 
+      in_header: google-analytics.html
 runtime: shiny
 ---
   
