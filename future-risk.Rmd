@@ -27,7 +27,7 @@ data("futyly")
 wtrchc <- unique(futrsk$water) %>% sort
 wtrstp <- diff(wtrchc) %>% round(2) %>% unique
 prpchc <- unique(futrsk$precp) %>% sort
-prpstp <- diff(prpchc) %>% round(2) %>% unique
+prpstp <- diff(prpchc) %>% round(3) %>% unique
 prbchc <- unique(futrsk$prb) %>% sort
 prbstp <- diff(prbchc) %>% round(2) %>% unique
 
